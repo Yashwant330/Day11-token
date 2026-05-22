@@ -1,6 +1,11 @@
 let {default:mongoose} = require("mongoose")
 let bcrypt = require('bcrypt')
-let userSchema = new mongoose.schema
+
+ let jwt = require('jsonwebtoken')
+
+let userSchema = new mongoose.Schema
+
+
 ({
     name:{
         type:String,
@@ -33,6 +38,16 @@ userSchema.pre('save',function(){
     this.password= bcrypt.hashSync(this.password,10)
 })
 
+userSchema.methods.generateJWT = function(){
+   return jwt.sign({id:this._id},process.env.JWT_SECRET,{
+    expiresIn:'1h'
+   }) 
+}
+
+
+userSchema.methods.comparePassword = function(password){
+    return bcrypt.compareSync(password,this.password)
+}
 
 let UserModel = mongoose.model("users",userSchema)
 
